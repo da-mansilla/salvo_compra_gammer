@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace Salvo.Models
 {
-    public class Game
+    public class GamePlayerDTO
     {
         public long Id { get; set; }
-        public DateTime? CreationDate { get; set; }
-        public ICollection<GamePlayer> GamePlayers { get; set; }
+        public DateTime? JoinDate { get; set; }
+        public PlayerDTO Player { get; set; }
     }
 }

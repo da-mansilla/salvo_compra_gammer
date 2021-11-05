@@ -69,6 +69,49 @@ namespace Salvo.Models
                 context.SaveChanges();
             }
             
+            if (!context.GamePlayers.Any())
+            {
+               Game game1 = context.Games.Find(1L);
+                Game game2 = context.Games.Find(2L);
+                Game game3 = context.Games.Find(3L);
+                Game game4 = context.Games.Find(4L);
+                Game game5 = context.Games.Find(5L);
+                Game game6 = context.Games.Find(6L);
+                Game game7 = context.Games.Find(7L);
+                Game game8 = context.Games.Find(8L);
+
+                Player jbauer = context.Players.Find(1L);
+                Player obrian = context.Players.Find(2L);
+                Player kbauer = context.Players.Find(3L);
+                Player almeida = context.Players.Find(4L);
+
+                var gamesPlayers = new GamePlayer[]
+                {
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game1, Player = jbauer },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game1, Player = obrian },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game2, Player = jbauer },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game2, Player = obrian },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game3, Player = obrian },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game3, Player = almeida },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game4, Player = obrian },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game4, Player = jbauer },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game5, Player = jbauer },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game5, Player = almeida },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game6, Player = kbauer },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game7, Player = almeida },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game8, Player = kbauer },
+                    new GamePlayer {JoinDate=DateTime.Now, Game = game8, Player = almeida },
+                };
+
+                foreach (GamePlayer gp in gamesPlayers)
+                {
+                    context.GamePlayers.Add(gp);
+                }
+                context.SaveChanges();
+
+            }
+            
+
         }
     }
 }
