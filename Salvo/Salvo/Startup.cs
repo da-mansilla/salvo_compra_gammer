@@ -28,8 +28,10 @@ namespace Salvo
             services.AddRazorPages();
             // Inyeccion de dependencia para salvo context
             services.AddDbContext<SalvoContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("SalvoDataBase")));
-            // Inyectar repositorio de game
+            // Inyectar Repositorio de Game
             services.AddScoped<IGameRepository, GameRepository>();
+            // Inyectar Repositorio de GamePlayer
+            services.AddScoped<IGamePlayerRepository, GamePlayerRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
