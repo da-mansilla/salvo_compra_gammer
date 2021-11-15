@@ -490,6 +490,68 @@ namespace Salvo.Models
 
                 context.SaveChanges();
             }
+            if (!context.Scores.Any())
+            {
+                Game game1 = context.Games.Find(1L);
+                Game game2 = context.Games.Find(2L);
+                Game game3 = context.Games.Find(3L);
+                Game game4 = context.Games.Find(4L);
+
+
+                Player jbauer = context.Players.Find(1L);
+                Player obrian = context.Players.Find(2L);
+                Player almeida = context.Players.Find(4L);
+
+                var scores = new Score[]
+                {
+                    //game 1
+                    new Score{ Game = game1, Player = jbauer, FinishDate = DateTime.Now, Point = 1 },
+                    new Score{ Game = game1, Player = obrian, FinishDate = DateTime.Now, Point = 0 },
+
+                    //game 2
+                    new Score{ Game = game2, Player = jbauer, FinishDate = DateTime.Now.AddMinutes(1), Point = 0.5 },
+                    new Score{ Game = game2, Player = obrian, FinishDate = DateTime.Now.AddMinutes(1), Point = 0.5 },
+
+                    //obrian gp5
+                    new Score {
+                        Game = game3,
+                        Player = obrian,
+                        FinishDate = DateTime.Now.AddMinutes(2),
+                        Point = 0
+                    },
+
+                    //almeida gp6
+                    new Score {
+                        Game = game3,
+                        Player = almeida,
+                        FinishDate = DateTime.Now.AddMinutes(2),
+                        Point = 1
+                    },
+
+                    //obrian gp7
+                    new Score {
+                        Game = game4,
+                        Player = obrian,
+                        FinishDate = DateTime.Now.AddMinutes(3),
+                        Point = 0.5
+                    },
+
+                    //jbauer gp8
+                    new Score {
+                        Game = game4,
+                        Player = jbauer,
+                        FinishDate = DateTime.Now.AddMinutes(3),
+                        Point = 0.5
+                    },
+                };
+
+                foreach (Score score in scores)
+                {
+                    context.Scores.Add(score);
+                }
+
+                context.SaveChanges();
+            }
 
 
         }

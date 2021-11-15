@@ -143,3 +143,4 @@ D:\Ducomentos\bootcamp_CG\proyecto-salvo\salvo_compra_gammer\Salvo\Salvo\obj\Deb
 D:\Ducomentos\bootcamp_CG\proyecto-salvo\salvo_compra_gammer\Salvo\Salvo\obj\Debug\net5.0\ref\Salvo.dll
 D:\Ducomentos\bootcamp_CG\proyecto-salvo\salvo_compra_gammer\Salvo\Salvo\obj\Debug\net5.0\Salvo.pdb
 D:\Ducomentos\bootcamp_CG\proyecto-salvo\salvo_compra_gammer\Salvo\Salvo\obj\Debug\net5.0\Salvo.genruntimeconfig.cache
+D:\Ducomentos\bootcamp_CG\proyecto-salvo\salvo_compra_gammer\Salvo\Salvo\obj\Debug\net5.0\Salvo.csproj.AssemblyReference.cache
