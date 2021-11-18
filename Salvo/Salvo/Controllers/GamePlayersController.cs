@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Salvo.Models;
 using Salvo.Repositories;
 using System;
@@ -12,6 +13,7 @@ namespace Salvo.Controllers
 {
     [Route("api/gamePlayers")]
     [ApiController]
+    [Authorize("PlayerOnly")]
     public class GamePlayersController : ControllerBase
     {
         private IGamePlayerRepository _repository;
@@ -27,7 +29,14 @@ namespace Salvo.Controllers
         {
             try
             {
+                string email = User.FindFirst("Player") != null ? User.FindFirst("Player").Value : "Guest";
+                //Obtención del Gameplayer
                 var gp = _repository.GetGamePlayerView(id);
+                // Verificar si el Gameplayer corresponde al mismo email del usuario autenticado
+                if(gp.Player.Email != email)
+                {
+                    return Forbid();
+                }
                 var gameView = new GameViewDTO
                 {
                     Id = gp.Id,

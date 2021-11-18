@@ -53,5 +53,10 @@ namespace Salvo.Repositories
             //return queryable.AsNoTracking();
             return queryable.AsNoTrackingWithIdentityResolution();
         }
+
+        public void SaveChanges()
+        {
+            this.RepositoryContext.SaveChanges();
+        }
     }
 }

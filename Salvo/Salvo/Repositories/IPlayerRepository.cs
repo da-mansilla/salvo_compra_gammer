@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Salvo.Repositories
 {
-    public interface IGamePlayerRepository
+    public interface IPlayerRepository
     {
-        GamePlayer GetGamePlayerView(long idGamePlayer);
-        void Save(GamePlayer gamePlayer);
-        
+        Player FindByEmail(string email);
+        void Save(Player player);
     }
 }

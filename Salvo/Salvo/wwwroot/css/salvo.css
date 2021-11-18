@@ -8,3 +8,11 @@
     background-color: rgba(255, 255, 255, .5);
 }
 
+#user-name{
+    color: red;
+    vertical-align: middle;
+}
+
+#games-list{
+    display: inline-block;
+}

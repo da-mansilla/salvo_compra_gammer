@@ -48,5 +48,11 @@ namespace Salvo.Repositories
                     .FirstOrDefault();
                */
         }
+
+        public void Save(GamePlayer gamePlayer)
+        {
+            Create(gamePlayer);
+            SaveChanges();
+        }
     }
 }
