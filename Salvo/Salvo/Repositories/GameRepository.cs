@@ -13,6 +13,15 @@ namespace Salvo.Repositories
         {
 
         }
+
+        public Game FindById(long id)
+        {
+            return FindByCondition(game => game.Id == id)
+                    .Include(game => game.GamePlayers)
+                        .ThenInclude(gp => gp.Player)
+                    .FirstOrDefault();
+        }
+
         public IEnumerable<Game> GetAllGames()
         {
             return FindAll()
