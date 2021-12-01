@@ -46,7 +46,6 @@ namespace Salvo.Controllers
                 _repository.Save(newPlayer);
                 // Retornamos el nuevo jugador
                 return StatusCode(201, newPlayer);
-                return Ok();
             }
             catch(Exception ex)
             {

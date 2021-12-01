@@ -136,5 +136,74 @@ namespace Salvo.Controllers
             }
         }
 
+        [HttpPost("{id}/salvos")]
+        public IActionResult PostSalvos(long id, [FromBody] SalvoDTO salvo)
+        {
+            try
+            {
+                // Vamos a buscar al jugador autenticado
+                string email = User.FindFirst("Player") != null ? User.FindFirst("Player").Value : "Guest";
+                Player player = _playerRepository.FindByEmail(email);
+
+                GamePlayer gamePlayer = _repository.FindById(id);
+
+                // Verificar que el juego con el id indicado exista
+                if (gamePlayer == null)
+                    return StatusCode(403, "No existe el Juego");
+
+                // Verificar si el usuario se encuentra en el juego donde se quieren agregar barcos
+                if (gamePlayer.Player.Id != player.Id)
+                    return StatusCode(403, "El usuario no se encuentra en el juego");
+
+                // Obtener el Gameplayer Oponente
+                GamePlayer opponentGamePlayer = gamePlayer.getOpponent();
+
+                // Verificar que el oponente existe
+                if (opponentGamePlayer == null)
+                    return StatusCode(403, "No hay oponente");
+
+                // Verificar si el oponente posicionó los Ships
+                if (gamePlayer.Ships.Count() == 0)
+                    return StatusCode(403, "Debe posicionar los barcos");
+                if (opponentGamePlayer.Ships.Count() == 0)
+                    return StatusCode(403, "El oponente no ha posicionado sus barcos");
+
+                    // Verificar que se han posicionado los barcos
+                    //if (gamePlayer.Ships.Count() != 5 || opponentGamePlayer.Ships.Count() != 5)
+                    //    return StatusCode(403, "Aun no se han posicionado los barcos");
+
+                int playerTurn = 0;
+                int opponentTurn = 0;
+
+                playerTurn = gamePlayer.Salvos != null ? gamePlayer.Salvos.Count() + 1 : 1;
+
+                if (opponentGamePlayer != null)
+                    opponentTurn = opponentGamePlayer.Salvos != null ? opponentGamePlayer.Salvos.Count() : 0;
+
+                if (playerTurn - opponentTurn > 1)
+                    return StatusCode(403, "No se puede adelantar");
+
+                // Agregar el Salvo
+                gamePlayer.Salvos.Add(new Models.Salvo
+                {
+                    Turn = playerTurn,
+                    GamePlayerId = gamePlayer.Id,
+                    Locations = salvo.Locations.Select(location => new SalvoLocation
+                    {
+                        Location = location.Location,
+                        SalvoId = salvo.Id
+                    }).ToList()
+                });
+
+                // Guardar en la bd
+                _repository.Save(gamePlayer);
+                return StatusCode(201, gamePlayer.Id);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
 }
