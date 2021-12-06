@@ -77,8 +77,11 @@ namespace Salvo.Controllers
                             Id = salvoLocation.Id,
                             Location = salvoLocation.Location
                         }).ToList()
-                    })).ToList()
-
+                    })).ToList(),
+                    Hits = gp.GetHits(),
+                    HitsOpponent = gp.getOpponent()?.GetHits(),
+                    Sunks = gp.GetSunks(),
+                    SunksOpponent = gp.getOpponent()?.GetSunks()
                 };
 
 
@@ -111,7 +114,7 @@ namespace Salvo.Controllers
                     return StatusCode(403, "El usuario no se encuentra en el juego");
 
                 // Verificar si ya se han posicionado los barcos
-                if (gamePlayer.Ships.Count() == 5)
+                if (gamePlayer.Ships.Count == 5)
                     return StatusCode(403, "Ya se han posicionado los barcos");
 
                 //Insertar los barcos en el GamePlayer
@@ -197,7 +200,7 @@ namespace Salvo.Controllers
 
                 // Guardar en la bd
                 _repository.Save(gamePlayer);
-                return StatusCode(201, gamePlayer.Id);
+                return StatusCode(201);  
             }
             catch(Exception ex)
             {

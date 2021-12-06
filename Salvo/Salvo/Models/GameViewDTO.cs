@@ -12,6 +12,10 @@ namespace Salvo.Models
         public ICollection<GamePlayerDTO> GamePlayers { get; set; }
         public ICollection<ShipDTO> Ships { get; set; }
         public ICollection<SalvoDTO> Salvos { get; set; }
+        public ICollection<SalvoHitDTO> Hits { get; set; }
+        public ICollection<SalvoHitDTO> HitsOpponent { get; internal set; }
+        public ICollection<string> Sunks { get; set; }
+        public ICollection<string> SunksOpponent { get; internal set; }
 
     }
 }
