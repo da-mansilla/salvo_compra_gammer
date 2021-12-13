@@ -16,6 +16,7 @@ namespace Salvo.Models
         public ICollection<SalvoHitDTO> HitsOpponent { get; internal set; }
         public ICollection<string> Sunks { get; set; }
         public ICollection<string> SunksOpponent { get; internal set; }
+        public string GameState { get; set; }
 
     }
 }

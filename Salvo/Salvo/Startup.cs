@@ -29,13 +29,16 @@ namespace Salvo
         {
             services.AddRazorPages();
             // Inyeccion de dependencia para salvo context
-            services.AddDbContext<SalvoContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("SalvoDataBase")));
+            services.AddDbContext<SalvoContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("SalvoDataBase")
+                ,o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             // Inyectar Repositorio de Game
             services.AddScoped<IGameRepository, GameRepository>();
             // Inyectar Repositorio de GamePlayer
             services.AddScoped<IGamePlayerRepository, GamePlayerRepository>();
             // Inyectar Repositoria de Player
             services.AddScoped<IPlayerRepository, PlayerRepository>();
+            // Inyectar Repositorio de Score
+            services.AddScoped<IScoreRepository, ScoreRepository> ();
 
 
 

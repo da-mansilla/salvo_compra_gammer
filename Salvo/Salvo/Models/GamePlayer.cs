@@ -40,7 +40,7 @@ namespace Salvo.Models
                     Type = ship.Type,
                     Hits = salvo.Locations.Where
                     (salvoLocation => ship.Locations.Any(shipLocation => shipLocation.Location == salvoLocation.Location))
-                    .Select(SalvoLocation => SalvoLocation.Location).ToList()
+                    .Select(salvoLocation => salvoLocation.Location).ToList()
                 }).ToList()
             }).ToList();
         }
@@ -56,8 +56,44 @@ namespace Salvo.Models
 
             return Ships?
             .Where(ship => ship.Locations.Select(shipLocation => shipLocation.Location)
-            .All(shipLocation => shipLocation != null ? salvoLocations.Any(salvoLocation => salvoLocation == shipLocation) : false))
+            .All(salvoLocation => salvoLocations != null ? salvoLocations.Any(shipLocation => shipLocation == salvoLocation) : false))
             .Select(ship => ship.Type).ToList();
+        }
+
+        public GameState GetGameState()
+        {
+            GameState gameState = GameState.ENTER_SALVO;
+            GamePlayer opponent = getOpponent();
+            // Evaluar los ships
+            if (Ships == null || Ships?.Count() == 0)
+                gameState = GameState.PLACE_SHIPS;
+            else if(opponent == null)
+            {
+                if (Salvos != null && Salvos?.Count() > 0)
+                    gameState = GameState.WAIT;
+            }
+            else
+            {   
+                int turn = Salvos != null ? Salvos.Count() : 0;
+                int opponentTurn = opponent.Salvos != null ? opponent.Salvos.Count() : 0;
+
+                if (turn > opponentTurn)
+                    gameState = GameState.WAIT;
+                else if(turn == opponentTurn && turn != 0)
+                {
+                    int playerSunks = GetSunks().Count();
+                    int opponentSunks = opponent.GetSunks().Count();
+
+                    if (playerSunks == Ships.Count() && opponentSunks == opponent.Ships.Count())
+                        gameState = GameState.TIE;
+                    else if (playerSunks == Ships.Count())
+                        gameState = GameState.LOSS;
+                    else if (opponentSunks == opponent.Ships.Count())
+                        gameState = GameState.WIN;
+                }
+            }
+
+            return gameState;
         }
     }
 }

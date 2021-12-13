@@ -18,11 +18,13 @@ namespace Salvo.Controllers
     {
         private IGamePlayerRepository _repository;
         private IPlayerRepository _playerRepository;
+        private IScoreRepository _scoreRepository;
 
-        public GamePlayersController(IGamePlayerRepository repository,IPlayerRepository playerRepository)
+        public GamePlayersController(IGamePlayerRepository repository,IPlayerRepository playerRepository, IScoreRepository scoreRepository)
         {
             _repository = repository;
             _playerRepository = playerRepository;
+            _scoreRepository = scoreRepository;
         }
 
         // GET api/<GamePlayersController>/5
@@ -60,6 +62,7 @@ namespace Salvo.Controllers
                         Player = new PlayerDTO
                         {
                             Id = gps.Player.Id,
+                            //Name = gps.Player.Name,
                             Email = gps.Player.Email
                         }
                     }).ToList(),
@@ -70,6 +73,7 @@ namespace Salvo.Controllers
                         Player = new PlayerDTO
                         {
                             Id = gps.Player.Id,
+                            //Name = gps.Player.Name,
                             Email = gps.Player.Email
                         },
                         Locations = salvo.Locations.Select(salvoLocation => new SalvoLocationDTO
@@ -81,7 +85,8 @@ namespace Salvo.Controllers
                     Hits = gp.GetHits(),
                     HitsOpponent = gp.getOpponent()?.GetHits(),
                     Sunks = gp.GetSunks(),
-                    SunksOpponent = gp.getOpponent()?.GetSunks()
+                    SunksOpponent = gp.getOpponent()?.GetSunks(),
+                    GameState = Enum.GetName(typeof(GameState), gp.GetGameState()),
                 };
 
 
@@ -94,7 +99,7 @@ namespace Salvo.Controllers
         }
 
         [HttpPost("{id}/ships")]
-        public IActionResult PostShips (long id, [FromBody] List<ShipDTO> ships)
+        public IActionResult Post(long id, [FromBody] List<ShipDTO> ships)
         {
             try
             {
@@ -124,14 +129,14 @@ namespace Salvo.Controllers
                     GamePlayerId = gamePlayer.Id,
                     Locations = ship.Locations.Select(location => new ShipLocation
                     {
-                        Location = location.Location,
-                        ShipId = ship.Id
+                        ShipId = ship.Id,
+                        Location = location.Location           
                     }).ToList()
                 }).ToList();
 
                 // Guardar en la bd
                 _repository.Save(gamePlayer);
-                return StatusCode(201, gamePlayer.Id);
+                return StatusCode(201);
             }
             catch(Exception ex)
             {
@@ -140,7 +145,7 @@ namespace Salvo.Controllers
         }
 
         [HttpPost("{id}/salvos")]
-        public IActionResult PostSalvos(long id, [FromBody] SalvoDTO salvo)
+        public IActionResult Post(long id, [FromBody] SalvoDTO salvo)
         {
             try
             {
@@ -158,16 +163,25 @@ namespace Salvo.Controllers
                 if (gamePlayer.Player.Id != player.Id)
                     return StatusCode(403, "El usuario no se encuentra en el juego");
 
+                // Obtener el GameState
+                GameState gameState = gamePlayer.GetGameState();
+                if (gameState == GameState.LOSS || gameState == GameState.WIN || gameState == GameState.TIE)
+                    return StatusCode(403, "El juego termino");
+
                 // Obtener el Gameplayer Oponente
                 GamePlayer opponentGamePlayer = gamePlayer.getOpponent();
 
                 // Verificar que el oponente existe
-                if (opponentGamePlayer == null)
-                    return StatusCode(403, "No hay oponente");
+                //if (opponentGamePlayer == null)
+                //    return StatusCode(403, "No hay oponente"); 
+                if (gamePlayer.Game.GamePlayers.Count() != 2)
+                    return StatusCode(403, "No hay Oponente");
+
+                // Verificar si el usuario ha posicionado los barcos
+                if (gamePlayer.Ships.Count() == 0)
+                    return StatusCode(403, "El usuario logeado no ha posicionado los barcos");
 
                 // Verificar si el oponente posicionó los Ships
-                if (gamePlayer.Ships.Count() == 0)
-                    return StatusCode(403, "Debe posicionar los barcos");
                 if (opponentGamePlayer.Ships.Count() == 0)
                     return StatusCode(403, "El oponente no ha posicionado sus barcos");
 
@@ -194,12 +208,72 @@ namespace Salvo.Controllers
                     Locations = salvo.Locations.Select(location => new SalvoLocation
                     {
                         Location = location.Location,
-                        SalvoId = salvo.Id
+                        //SalvoId = salvo.Id
                     }).ToList()
                 });
 
                 // Guardar en la bd
                 _repository.Save(gamePlayer);
+                // Guardar el Score
+                gameState = gamePlayer.GetGameState();
+                if(gameState == GameState.WIN)
+                {
+                    Score score = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = gamePlayer.PlayerId,
+                        Point = 1
+                    };
+                    _scoreRepository.Save(score);
+                    Score scoreOpponent = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = opponentGamePlayer.PlayerId,
+                        Point = 0
+                    };
+                    _scoreRepository.Save(scoreOpponent);
+                }
+                else if (gameState == GameState.LOSS)
+                {
+                    Score score = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = gamePlayer.PlayerId,
+                        Point = 0
+                    };
+                    _scoreRepository.Save(score);
+                    Score scoreOpponent = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = opponentGamePlayer.PlayerId,
+                        Point = 1
+                    };
+                    _scoreRepository.Save(scoreOpponent);
+                }
+                else if (gameState == GameState.TIE)
+                {
+                    Score score = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = gamePlayer.PlayerId,
+                        Point = 0.5
+                    };
+                    _scoreRepository.Save(score);
+                    Score scoreOpponent = new Score
+                    {
+                        FinishDate = DateTime.Now,
+                        GameId = gamePlayer.GameId,
+                        PlayerId = opponentGamePlayer.PlayerId,
+                        Point = 0.5
+                    };
+                    _scoreRepository.Save(scoreOpponent);
+                }
+
                 return StatusCode(201);  
             }
             catch(Exception ex)

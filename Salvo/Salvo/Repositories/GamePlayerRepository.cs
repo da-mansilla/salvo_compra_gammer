@@ -17,17 +17,18 @@ namespace Salvo.Repositories
                     .Include(gp => gp.Game)
                         .ThenInclude(game => game.GamePlayers)
                             .ThenInclude(gp => gp.Salvos)
+                                .ThenInclude(salvos => salvos.Locations)
                     .Include(gp => gp.Game)
                         .ThenInclude(game => game.GamePlayers)
                             .ThenInclude(gp => gp.Ships)
+                                .ThenInclude(ships => ships.Locations)
                     .Include(gp => gp.Player)
-                    .Include(gp => gp.Ships)
-                    .Include(gp => gp.Salvos)
                     .FirstOrDefault();
         }
 
         public GamePlayer GetGamePlayerView(long idGamePlayer)
         {
+            
             return FindAll(source => source.Include(gamePlayer => gamePlayer.Game)
                                                 .ThenInclude(game => game.GamePlayers)
                                                     .ThenInclude(gp => gp.Player)
@@ -51,8 +52,8 @@ namespace Salvo.Repositories
                                                         .ThenInclude(salvo => salvo.Locations)
                                                     .Include(gp => gp.Ships)
                                                         .ThenInclude(ship => ship.Locations)
-            */
-            /*
+            
+            
             return FindByCondition(gp => gp.Id == idGamePlayer)
                                             .Include(gamePlayer => gamePlayer.Game)
                                                 .ThenInclude(game => game.GamePlayers)
@@ -65,9 +66,9 @@ namespace Salvo.Repositories
                                                 .ThenInclude(game => game.GamePlayers)
                                                     .ThenInclude(gp => gp.Ships)
                                                         .ThenInclude(ship => ship.Locations)
-              */                              
+              */
             /*
-            return FindAll(source => source.Include(gamePlayer => gamePlayer.Ships)
+            return FindAll(source2 => source2.Include(gamePlayer => gamePlayer.Ships)
                                                 .ThenInclude(ship => ship.Locations)
                                             .Include(gamePlayer => gamePlayer.Salvos)
                                                 .ThenInclude(salvo => salvo.Locations)
@@ -86,7 +87,7 @@ namespace Salvo.Repositories
                 .Where(gamePlayer => gamePlayer.Id == idGamePlayer)
                 .OrderBy(game => game.JoinDate)
                 .FirstOrDefault();
-            */
+             */
         }
 
         public void Save(GamePlayer gamePlayer)
