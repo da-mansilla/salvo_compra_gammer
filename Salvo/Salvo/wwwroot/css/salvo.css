@@ -1,17 +1,22 @@
 ﻿body {
-    background-image: url('../img/battleship.jpg');
+    background-image: url('../img/battleship.png');
     background-repeat: no-repeat;
     background-size: cover;
+    background-color: rgb(52, 58, 64);
 }
 
 .container {
     background-color: rgba(255, 255, 255, .5);
+    border-radius: 15px;
+    padding: 0px;
 }
 
 #user-name{
     color: red;
     vertical-align: middle;
-}
+    margin-right: 15px;
+    
+}   
 
 #games-list{
     display: inline-block;
@@ -19,14 +24,15 @@
 
 #game-state {
     margin: 10px 10px 10px 0px;
-    border: dashed white 1px;
     display: inline-block;
     min-width: 350px;
-    padding: 5px;
+    padding: 10px;
     background-color: #484d5c;
     font-family: 'Oswald', sans-serif;
     color: #ffce00;
+    font-size: 25px;
     text-align: center;
+    border-radius: 5px;
 }
 
 #game-state span{
@@ -37,30 +43,178 @@
     display: inline-block;
     background-size: contain;
     background-repeat: no-repeat;
+    background-position: center;
     width: 200px;
     height: 100px;
 }
 
 .img-state-wait {
-    background-image: url(../img/wait.gif);
+    background-image: url(../img/game_states/wait.gif);
 }
 
 .img-state-ship {
-    background-image: url(../img/place_ship.gif);
+    background-image: url(../img/game_states/place_ship.gif);
 }
 
 .img-state-fire {
-    background-image: url(../img/fire.gif);
+    background-image: url(../img/game_states/fire.gif);
 }
 
 .img-state-win {
-    background-image: url(../img/win.gif);
+    background-image: url(../img/game_states/win.gif);
 }
 
 .img-state-loss {
-    background-image: url(../img/loss.gif);
+    background-image: url(../img/game_states/loss.gif);
 }
 
 .img-state-tie {
-    background-image: url(../img/tie.gif);
+    background-image: url(../img/game_states/tie.gif);
 }
+
+.img-state-wait-opponent{
+    background-image: url(../img/game_states/wait_opponent.gif);
+}
+
+.img-state-wait-opponent-ships {
+    background-image: url(../img/game_states/wait_opponent_ships.gif);
+}
+
+.title {
+    text-align: center;
+    font-family: bs-font;
+    color: rgba(226, 226, 226);
+    text-shadow: 1px 1px 3px rgb(36, 36, 36);
+}
+#logo{
+    height: 100;
+    width: auto;
+    margin: auto;
+    display: block;
+}
+.game-text{
+    /* color: white; */
+    font-family: 'PT Sans', sans-serif;
+}
+
+.sticky-head{
+    position: sticky;
+    top: 0;
+}
+
+.scroll::-webkit-scrollbar-track
+{
+	box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+.scroll::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: #f5f5f500;
+}
+
+.scroll::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+.invalid-feedback{
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+.slide-table{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 30;
+    max-width: 100%;
+    max-height: 50%;
+    overflow: auto;
+    }
+
+.up-enter-active, .up-leave-active {
+    overflow: hidden;
+
+    animation: up 2s;
+}
+.up-enter, .up-leave-to{
+    overflow: hidden;
+    animation: down 0.6s;
+}
+
+@keyframes up {
+    from{
+        max-width: 0%;
+        display: table;
+    }
+    to{
+        max-width: 100%;
+        display: table;
+    }
+}
+@keyframes down {
+    from{
+        max-height: 100%;
+    }
+    to{
+        max-height: 0%;
+    }
+}
+.tab-title{
+    position: absolute;
+    margin-left: calc( 50% - 64px );
+}
+.preloader {
+    width: 50px;
+    height: 50px;
+    border: 7px solid #eee;
+    border-top: 7px solid #666;
+    border-radius: 50%;
+    animation-name: girar;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    position: relative;
+    display: inline-block;
+  }
+  @keyframes girar {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .games-container{
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 425px;
+  }
+  .game-container{
+    background-color: rgb(62, 68, 74);
+    color: blanchedalmond;
+    min-width: 220px;
+  }
+  .resend-text{
+    color: rgb(0, 153, 255);
+    transition: color .3s;
+    font-size: 'PT Sans';
+  }
+  .resend-text:hover{
+    color: rgb(53, 174, 255);
+  }
+
+  #joinLink::selection{
+      background-color: transparent;
+      outline: none;
+  }
+  .boat-on{
+      height: 30px !important;
+      width: auto;
+      display: block;
+      margin: auto;
+      margin-bottom: -8px;
+  }

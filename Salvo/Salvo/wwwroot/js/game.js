@@ -1,20 +1,60 @@
-﻿var app = new Vue({
+﻿const urlParams = new URLSearchParams(window.location.search);
+const register = urlParams.get('register');
+
+var app = new Vue({
     el: '#app',
     data: {
         games: [],
+        openGames: [],
+        myGames: [],
+        joineableGames: [],
         scores: [],
         email: "",
         password: "",
+        user: "",
         modal: {
             tittle: "",
             message: ""
         },
-        player: null
+        player: null,
+        show: false,
+        interval: null,
+        injectHTML: ""
     },
     mounted() {
+        $("#logout-btn").hide();
+        if( register == null){
+            this.getGames();
+            return
+        }
+        let data = register.split("/")
+        history.pushState(null, "", "index.html")
+        if (data[0] == "successed"){
+            this.modal.tittle = "Registro exitoso"
+            this.modal.message = "Verifique su correo electronico para activar su cuenta"
+            this.injectHTML = "";
+            this.showModal(true);
+        }
+        else if (data[0] == "resend"){
+            if (data.length < 2){
+                this.modal.tittle = "Datos invalidos"
+                this.modal.message = "Verifique el formato"
+                this.injectHTML = "";
+                this.showModal(true);
+            }
+            else{
+                this.resendMail(data[1]);
+            }
+        }
         this.getGames();
     },
     methods: {
+        historyPage() {
+            window.location.href = '/history.html';
+        },
+        registerPage() {
+            window.location.href = '/register.html';
+        },
         joinGame(gId) {
             var gpId = null;
             axios.post('/api/games/' + gId + '/players')
@@ -23,7 +63,11 @@
                     window.location.href = '/game.html?gp=' + gpId;
                 })
                 .catch(error => {
-                    alert("erro al unirse al juego");
+                    console.error(error);
+                    this.modal.tittle = "Error " + error.response.status;
+                    this.modal.message = error.response.data;
+                    this.injectHTML = "";
+                    this.showModal(true);
                 });
         },
         createGame() {
@@ -34,25 +78,49 @@
                     window.location.href = '/game.html?gp=' + gpId;
                 })
                 .catch(error => {
-                    alert("erro al obtener los datos");
+                    console.error(error);
+                    this.modal.tittle = "Error " + error.response.status;
+                    this.modal.message = error.response.data;
+                    this.injectHTML = "";
+                    this.showModal(true);
                 });
         },
         returnGame(gpId) {
             window.location.href = '/game.html?gp=' + gpId;
         },
-        getGames: function (){
+        getGames: async function () {
             this.showLogin(false);
-            axios.get('/api/games')
+            await axios.get('/api/games')
                 .then(response => {
                     this.player = response.data.email;
                     this.games = response.data.games;
-                    this.getScores(this.games)
-                    if (this.player == "Guest")
-                        this.showLogin(true);
                 })
                 .catch(error => {
-                    alert("erro al obtener los datos");
+                    console.error(error);
+                    this.modal.tittle = "Error " + error.status;
+                    this.modal.message = error.data;
+                    this.injectHTML = "";
+                    this.showModal(true);
                 });
+            this.openGames = this.getOpenGames(this.games);
+            this.myGames = this.getMyGames(this.openGames);
+            this.joineableGames = this.getJoineableGames(this.openGames);
+            this.getScores(this.games);
+            if (this.player == "Guest") {
+                this.showLogin(true);
+            }
+            else {
+                $("#logout-btn").show();
+            }
+            if (this.interval == null && this.player != "Guest") {
+                this.interval = setInterval(this.getGames, 5000);
+            }
+            else if (this.player != "Guest") {
+                this.$forceUpdate();
+            }
+            else {
+                clearInterval(this.interval);
+            }
         },
         showModal: function (show) {
             if (show)
@@ -60,12 +128,20 @@
             else
                 $("#infoModal").modal('hide');
         },
+        showLoadingModal(show){
+            if (show)
+                $("#loadingModal").modal('show');
+            else
+                $("#loadingModal").modal('hide');
+        },
         showLogin: function (show) {
             if (show) {
                 $("#login-form").show();
                 $("#login-form").trigger("reset");
                 this.email = "";
                 this.password = "";
+                this.user = "";
+                $("#logout-btn").hide();
             }
             else
                 $("#login-form").hide();
@@ -79,12 +155,16 @@
                     }
                 })
                 .catch(error => {
-                    alert("Ocurrió un error al cerrar sesión");
+                    console.error(error);
+                    this.modal.tittle = "Error " + error.response.status;
+                    this.modal.message = error.response.data;
+                    this.injectHTML = "";
+                    this.showModal(true);
                 });
         },
-        login: function(event){
+        login: function (event) {
             axios.post('/api/auth/login', {
-                email: this.email, password: this.password
+                email: this.email, password: this.password, user: ""
             })
                 .then(result => {
                     if (result.status == 200) {
@@ -93,41 +173,46 @@
                     }
                 })
                 .catch(error => {
-                    console.log("error, código de estatus: " + error.response.status);
+                    console.error(error);
                     if (error.response.status == 401) {
-                        this.modal.tittle = "Falló la autenticación";
-                        this.modal.message = "Email o contraseña inválido"
+                        this.modal.tittle = "Fallo de autenticacion";
+                        this.modal.message = error.response.data;
+                        this.injectHTML = "";
+                        this.showModal(true);
+                    }
+                    else if(error.response.status == 403){
+                        this.modal.tittle = "Usuario sin activar";
+                        this.modal.message = "";
+                        this.injectHTML= "<i> 'Verfique su correo electronico o carpeta de spam para activarlo, caso contrario reenvie el correo haciendo click '</i><a href='/index.html?register=resend/" + this.email + "'>aqui</a>";
                         this.showModal(true);
                     }
                     else {
-                        this.modal.tittle = "Fall&Oacute;la autenticaci&oacute;n";
-                        this.modal.message = "Ha ocurrido un error";
+                        this.modal.tittle = "error";
+                        this.injectHTML = "";
+                        this.modal.message = error.response.data;
                         this.showModal(true);
                     }
                 });
         },
-        signin: function (event) {
-            axios.post('/api/players', {
-                email: this.email, password: this.password
-            })
+        resendMail(email){
+            this.showModal(false);
+            this.showLoadingModal(true);
+            this.delay(500);
+            axios.post("/api/players/resend/" + email)
                 .then(result => {
-                    if (result.status == 201) {
-                        this.login();
-                    }
+                    this.showLoadingModal(false);
+                    this.modal.tittle = "Reenvio exitoso";
+                    this.modal.message = "Verifique nuevamente su correo";
+                    this.injectHTML = "";
+                    this.showModal(true);
                 })
                 .catch(error => {
-                    console.log("error, código de estatus: " + error.response.status);
-                    if (error.response.status == 403) {
-                        this.modal.tittle = "Falló el registro";
-                        this.modal.message = error.response.data
-                        this.showModal(true);
-                    }
-                    else {
-                        this.modal.tittle = "Fall&Oacute;la autenticaci&oacute;n";
-                        this.modal.message = "Ha ocurrido un error";
-                        this.showModal(true);
-                    }
-                });
+                    console.error(error);
+                    this.modal.tittle = "Error en el Reenvio";
+                    this.modal.message = error.response.data;
+                    this.injectHTML = "";
+                    this.showModal(true);
+                })
         },
         getScores: function (games) {
             var scores = [];
@@ -166,12 +251,50 @@
                     }
                 })
             })
+            scores.sort(function(a, b){return b.total - a.total});
             app.scores = scores;
+
+        },
+        getOpenGames: function (games) {
+            let openGames = [];
+            games.forEach(game => {
+                if (game.gamePlayers[0]?.point == null) {
+                    openGames.push(game);
+                }
+            })
+            return openGames;
+        },
+        getMyGames: function (games) {
+            let myGames = [];
+            games.forEach(game => {
+                game.gamePlayers.forEach(gp => {
+                    if (gp.player.email == this.player)
+                        myGames.push(game);
+                });
+            });
+            return myGames;
+        },
+        getJoineableGames: function (games) {
+            let joineableGames = [];
+            games.forEach(game => {
+                if (game.gamePlayers.length == 1 && game.gamePlayers[0].player?.email != this.player) {
+                    joineableGames.push(game);
+                }
+            });
+            return joineableGames;
+        },
+        delay(ms){
+            return new Promise(function(resolve){
+            setTimeout(resolve,ms);
+            });
         }
     },
     filters: {
-        dateFormat(date) {
-            return moment(date).format('LLL');
+        dateFormat(stringDate) {
+            let date = new Date(stringDate)
+            let utcDiff = date.getTimezoneOffset() / 60;
+            let localDate = new Date(date.setHours(date.getHours() - utcDiff)).toJSON();
+            return moment(localDate).format('l') + moment(localDate).format(' LTS');
         }
     }
 })
